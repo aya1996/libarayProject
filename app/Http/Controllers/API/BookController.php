@@ -127,4 +127,21 @@ class BookController extends Controller
         ];
         return response($response, 200);
     }
+
+    public function showProfile($id)
+    {
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $book->author = $book->author;
+        $book->tags = $book->tags;
+        $response = [
+            'book'    => $book,
+
+        ];
+        return response($response, 200);
+    }
 }
