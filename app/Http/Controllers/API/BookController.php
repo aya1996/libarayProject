@@ -94,7 +94,8 @@ class BookController extends Controller
             'title' => 'required|string|max:855',
             'image' => 'required',
             'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'author_id' => 'required|exists:authors,id'
+            'author_id' => 'required|exists:authors,id',
+            'tags' => 'required|array|exists:tags,id',
         ]);
 
         $book = Book::find($id);
@@ -103,11 +104,23 @@ class BookController extends Controller
                 'message' => 'Record not found'
             ], 404);
         }
-        $book->update([
-            'title' => $request->title,
-            'image' => $request->image,
-            'author_id' => $request->author_id,
-        ]);
+
+        $book->title = $request->title;
+        $book->author_id = $request->author_id;
+        $book->update();
+
+        if ($request->hasfile('image')) {
+            $image = $request->file('image');
+            $name =  mt_rand() . $image->getClientOriginalName();
+
+            $image->move(public_path() . '/images/', $name);
+        }
+
+        $book->image = $name;
+        $book->update();
+
+        $book->tags()->sync($request->tags);
+
         $response = [
             'book'    => $book,
 
@@ -121,7 +134,7 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
         $book = Book::find($id);
         if (!$book) {

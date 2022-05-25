@@ -28,7 +28,7 @@ class TagController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|string|max:255',
-          
+
         ]);
     }
 
@@ -77,7 +77,6 @@ class TagController extends Controller
             'tag'    => $tag,
         ];
         return response($response, 200);
-
     }
 
     /**
@@ -86,9 +85,9 @@ class TagController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
-        
+
         $tag = Tag::find($id);
         if (!$tag) {
             return response()->json([

@@ -89,24 +89,25 @@ class AuthorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'name' => 'required|string|max:255',
-            'title' => 'required|string|max:855',
-            'image' => 'required',
-            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
-
         $author = Author::find($id);
-        if (!$author) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+        $author->name = $request->name;
+        $author->title = $request->title;
+        $author->update();
+
+        if ($request->hasfile('image')) {
+            $image = $request->file('image');
+            $name =  mt_rand() . $image->getClientOriginalName();
+            $image->move(public_path() . '/images/', $name);
         }
-        $author->update($request->all());
+
+        $author->image = $name;
+        $author->update();
+        //  dd($author);
         $response = [
             'author'    => $author,
 
         ];
+
         return response($response, 200);
     }
 
@@ -116,7 +117,7 @@ class AuthorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
         $author = Author::find($id);
         if (!$author) {
