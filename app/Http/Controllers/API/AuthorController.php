@@ -58,7 +58,7 @@ class AuthorController extends Controller
      */
     public function show($id)
     {
-         
+
         $author = Author::find($id);
         if (!$author) {
             return response()->json([
@@ -100,7 +100,6 @@ class AuthorController extends Controller
 
         ];
         return response($response, 200);
-       
     }
 
     /**
@@ -120,6 +119,27 @@ class AuthorController extends Controller
         $author->delete();
         $response = [
             'message'    => 'Record deleted successfully'
+        ];
+        return response($response, 200);
+    }
+
+    public function showProfile($id)
+    {
+
+        $author = Author::find($id);
+
+        if (!$author) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+
+        $author->books = $author->books()->get();
+
+
+        $response = [
+            'author'    => $author,
+
         ];
         return response($response, 200);
     }

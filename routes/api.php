@@ -25,6 +25,7 @@ Route::get('/authors/{id}', [AuthorController::class, 'show']);
 Route::post('/author', [AuthorController::class, 'store']);
 Route::put('/authors/{id}', [AuthorController::class, 'update']);
 Route::delete('/authors/{id}', [AuthorController::class, 'delete']);
+Route::get('/showProfile/{id}', [AuthorController::class, 'showProfile']);
 
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/tags/{id}', [TagController::class, 'show']);
