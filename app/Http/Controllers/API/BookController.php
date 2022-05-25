@@ -15,7 +15,18 @@ class BookController extends Controller
      */
     public function index()
     {
-        return Book::all();
+
+        $bookauthor = Book::query()->when(request('author_id'), function ($query) {
+            return $query->where('author_id', request('author_id'));
+        })->when(request('tag_id'), function ($query) {
+            return $query->whereHas('tags', function ($query) {
+                return $query->where('tag_id', request('tag_id'));
+            });
+        })->with('author', 'tags')->get();
+
+        return $bookauthor;
+
+        //return Book::all();
     }
 
     /**
