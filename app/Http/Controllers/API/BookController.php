@@ -35,11 +35,20 @@ class BookController extends Controller
             'tags' => 'required|array|exists:tags,id',
         ]);
 
-        $book =  Book::create([
-            'title' => $request->title,
-            'image' => $request->image,
-            'author_id' => $request->author_id,
-        ]);
+        $book = new Book();
+        $book->title = $request->title;
+        $book->author_id = $request->author_id;
+        $book->save();
+
+        if ($request->hasfile('image')) {
+            $image = $request->file('image');
+            $name =  mt_rand() . $image->getClientOriginalName();
+
+            $image->move(public_path() . '/images/', $name);
+        }
+
+        $book->image = $name;
+        $book->save();
 
         $book->tags()->attach($request->tags);
 

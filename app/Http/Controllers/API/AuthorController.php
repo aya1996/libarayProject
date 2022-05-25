@@ -36,13 +36,21 @@ class AuthorController extends Controller
         ]);
 
 
-        $author =  Author::create([
-            'name' => $request->name,
-            'title' => $request->title,
-            'image' => $request->image,
+        $author = new Author();
+        $author->name = $request->name;
+        $author->title = $request->title;
+        $author->save();
 
+        if ($request->hasfile('image')) {
+            $image = $request->file('image');
+            $name =  mt_rand() . $image->getClientOriginalName();
 
-        ]);
+            $image->move(public_path() . '/images/', $name);
+        }
+
+        $author->image = $name;
+        $author->save();
+
         $response = [
             'author'    => $author,
 
