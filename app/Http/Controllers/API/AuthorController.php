@@ -15,7 +15,7 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        //
+        return Author::all();
     }
 
     /**
@@ -58,7 +58,18 @@ class AuthorController extends Controller
      */
     public function show($id)
     {
-        //
+         
+        $author = Author::find($id);
+        if (!$author) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $response = [
+            'author'    => $author,
+
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -70,7 +81,26 @@ class AuthorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|string|max:255',
+            'title' => 'required|string|max:855',
+            'image' => 'required',
+            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+
+        $author = Author::find($id);
+        if (!$author) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $author->update($request->all());
+        $response = [
+            'author'    => $author,
+
+        ];
+        return response($response, 200);
+       
     }
 
     /**
@@ -81,6 +111,16 @@ class AuthorController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $author = Author::find($id);
+        if (!$author) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $author->delete();
+        $response = [
+            'message'    => 'Record deleted successfully'
+        ];
+        return response($response, 200);
     }
 }

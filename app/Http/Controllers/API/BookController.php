@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Book;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -14,7 +15,7 @@ class BookController extends Controller
      */
     public function index()
     {
-        //
+        return Book::all();
     }
 
     /**
@@ -25,7 +26,28 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $this->validate($request, [
+            'title' => 'required|string|max:855',
+            'image' => 'required',
+            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'author_id' => 'required|exists:authors,id',
+            'tags' => 'required|array|exists:tags,id',
+        ]);
+
+        $book =  Book::create([
+            'title' => $request->title,
+            'image' => $request->image,
+            'author_id' => $request->author_id,
+        ]);
+
+        $book->tags()->attach($request->tags);
+
+        $response = [
+            'book'    => $book,
+
+        ];
+        return response($response, 201);
     }
 
     /**
@@ -36,7 +58,17 @@ class BookController extends Controller
      */
     public function show($id)
     {
-        //
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $response = [
+            'book'    => $book,
+
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -48,7 +80,30 @@ class BookController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        $this->validate($request, [
+            'title' => 'required|string|max:855',
+            'image' => 'required',
+            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'author_id' => 'required|exists:authors,id'
+        ]);
+
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $book->update([
+            'title' => $request->title,
+            'image' => $request->image,
+            'author_id' => $request->author_id,
+        ]);
+        $response = [
+            'book'    => $book,
+
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -59,6 +114,17 @@ class BookController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $book->delete();
+        $response = [
+            'book'    => $book,
+
+        ];
+        return response($response, 200);
     }
 }

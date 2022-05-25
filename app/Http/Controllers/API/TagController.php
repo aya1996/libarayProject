@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 
 class TagController extends Controller
@@ -14,7 +15,7 @@ class TagController extends Controller
      */
     public function index()
     {
-        //
+        return Tag::all();
     }
 
     /**
@@ -25,7 +26,10 @@ class TagController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|string|max:255',
+          
+        ]);
     }
 
     /**
@@ -36,7 +40,16 @@ class TagController extends Controller
      */
     public function show($id)
     {
-        //
+        $tag = Tag::find($id);
+        if (!$tag) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $response = [
+            'tag'    => $tag,
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -48,7 +61,23 @@ class TagController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|string|max:255',
+        ]);
+
+        $tag = Tag::find($id);
+        if (!$tag) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $tag->name = $request->name;
+        $tag->save();
+        $response = [
+            'tag'    => $tag,
+        ];
+        return response($response, 200);
+
     }
 
     /**
@@ -59,6 +88,17 @@ class TagController extends Controller
      */
     public function destroy($id)
     {
-        //
+        
+        $tag = Tag::find($id);
+        if (!$tag) {
+            return response()->json([
+                'message' => 'Record not found'
+            ], 404);
+        }
+        $tag->delete();
+        $response = [
+            'tag'    => $tag,
+        ];
+        return response($response, 200);
     }
 }
