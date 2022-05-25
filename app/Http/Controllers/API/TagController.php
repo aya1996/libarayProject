@@ -30,6 +30,12 @@ class TagController extends Controller
             'name' => 'required|string|max:255',
 
         ]);
+
+        $tag = new Tag();
+        $tag->name = $request->name;
+        $tag->save();
+
+        return $tag;
     }
 
     /**
@@ -95,9 +101,9 @@ class TagController extends Controller
             ], 404);
         }
         $tag->delete();
-        $response = [
-            'tag'    => $tag,
-        ];
-        return response($response, 200);
+
+        return response()->json([
+            'message' => 'Record deleted'
+        ], 200);
     }
 }

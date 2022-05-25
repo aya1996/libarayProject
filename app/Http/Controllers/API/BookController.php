@@ -53,7 +53,7 @@ class BookController extends Controller
 
         if ($request->hasfile('image')) {
             $image = $request->file('image');
-            $name =  mt_rand() . $image->getClientOriginalName();
+            $name =  mt_rand() . $image->getExtension();
 
             $image->move(public_path() . '/images/', $name);
         }
@@ -122,7 +122,7 @@ class BookController extends Controller
 
         if ($request->hasfile('image')) {
             $image = $request->file('image');
-            $name =  mt_rand() . $image->getClientOriginalName();
+            $name =  mt_rand() . $image->getExtension();
 
             $image->move(public_path() . '/images/', $name);
         }
@@ -154,11 +154,9 @@ class BookController extends Controller
             ], 404);
         }
         $book->delete();
-        $response = [
-            'book'    => $book,
-
-        ];
-        return response($response, 200);
+        return response()->json([
+            'message' => 'Record deleted'
+        ], 200);
     }
 
     public function showProfile($id)
@@ -169,8 +167,9 @@ class BookController extends Controller
                 'message' => 'Record not found'
             ], 404);
         }
-        $book->author = $book->author;
-        $book->tags = $book->tags;
+
+        $book->auther()->tags()->get();
+
         $response = [
             'book'    => $book,
 
