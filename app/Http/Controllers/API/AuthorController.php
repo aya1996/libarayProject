@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthorRequest;
+use App\Http\Resources\AuthorResource;
 use App\Models\Author;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class AuthorController extends Controller
 {
@@ -24,18 +27,8 @@ class AuthorController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(AuthorRequest  $request)
     {
-
-        $this->validate($request, [
-
-            'name' => 'required|string|max:255',
-            'title' => 'required|string|max:855',
-            'image' => 'required',
-            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
-
-
         $author = new Author();
         $author->name = $request->name;
         $author->title = $request->title;
@@ -43,7 +36,7 @@ class AuthorController extends Controller
 
         if ($request->hasfile('image')) {
             $image = $request->file('image');
-            $name =  mt_rand() . $image->getClientOriginalName();
+            $name = mt_rand() . '.' . $image->getClientOriginalExtension();
 
             $image->move(public_path() . '/images/', $name);
         }
@@ -73,11 +66,8 @@ class AuthorController extends Controller
                 'message' => 'Record not found'
             ], 404);
         }
-        $response = [
-            'author'    => $author,
 
-        ];
-        return response($response, 200);
+        return new AuthorResource($author);
     }
 
     /**
@@ -87,7 +77,7 @@ class AuthorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(AuthorRequest $request, $id)
     {
         $author = Author::find($id);
         $author->name = $request->name;
@@ -95,20 +85,23 @@ class AuthorController extends Controller
         $author->update();
 
         if ($request->hasfile('image')) {
+            File::delete(public_path('images/' . $author->image));
+
             $image = $request->file('image');
-            $name =  mt_rand() . $image->getClientOriginalName();
+            $name = mt_rand() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path() . '/images/', $name);
         }
 
         $author->image = $name;
         $author->update();
         //  dd($author);
+
         $response = [
-            'author'    => $author,
+            'message' => 'Author updated successfully',
 
         ];
 
-        return response($response, 200);
+        return new AuthorResource($author, $response);
     }
 
     /**
@@ -126,6 +119,7 @@ class AuthorController extends Controller
             ], 404);
         }
         $author->delete();
+        File::delete(public_path('images/' . $author->image));
         $response = [
             'message'    => 'Record deleted successfully'
         ];

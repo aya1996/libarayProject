@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BookRequest;
+use App\Http\Resources\BookResource;
 use App\Models\Book;
+use App\Models\BookTag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class BookController extends Controller
 {
@@ -35,16 +39,8 @@ class BookController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BookRequest $request)
     {
-
-        $this->validate($request, [
-            'title' => 'required|string|max:855',
-            'image' => 'required',
-            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'author_id' => 'required|exists:authors,id',
-            'tags' => 'required|array|exists:tags,id',
-        ]);
 
         $book = new Book();
         $book->title = $request->title;
@@ -53,7 +49,7 @@ class BookController extends Controller
 
         if ($request->hasfile('image')) {
             $image = $request->file('image');
-            $name =  mt_rand() . $image->getExtension();
+            $name =  mt_rand() . '.' . $image->getClientOriginalExtension();
 
             $image->move(public_path() . '/images/', $name);
         }
@@ -64,10 +60,10 @@ class BookController extends Controller
         $book->tags()->attach($request->tags);
 
         $response = [
-            'book'    => $book,
+            'message'    => 'Book created successfully',
 
         ];
-        return response($response, 201);
+        return new BookResource($book, $response);
     }
 
     /**
@@ -98,16 +94,9 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(BookRequest $request, $id)
     {
 
-        $this->validate($request, [
-            'title' => 'required|string|max:855',
-            'image' => 'required',
-            'image.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'author_id' => 'required|exists:authors,id',
-            'tags' => 'required|array|exists:tags,id',
-        ]);
 
         $book = Book::find($id);
         if (!$book) {
@@ -121,8 +110,10 @@ class BookController extends Controller
         $book->update();
 
         if ($request->hasfile('image')) {
+            File::delete(public_path('images/' . $book->image));
+
             $image = $request->file('image');
-            $name =  mt_rand() . $image->getExtension();
+            $name =  mt_rand() . '.' . $image->getClientOriginalExtension();
 
             $image->move(public_path() . '/images/', $name);
         }
@@ -154,6 +145,7 @@ class BookController extends Controller
             ], 404);
         }
         $book->delete();
+        File::delete(public_path('images/' . $book->image));
         return response()->json([
             'message' => 'Record deleted'
         ], 200);
