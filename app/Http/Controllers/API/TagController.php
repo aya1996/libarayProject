@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TagResource;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,8 @@ class TagController extends Controller
      */
     public function index()
     {
-        return Tag::all();
+        return $this->handleResponse(TagResource::collection(Tag::all()), 200);
+        //return Tag::all();
     }
 
     /**
@@ -35,7 +37,8 @@ class TagController extends Controller
         $tag->name = $request->name;
         $tag->save();
 
-        return $tag;
+        return $this->handleResponse(new TagResource($tag), 201);
+        // return $tag;
     }
 
     /**
@@ -48,14 +51,17 @@ class TagController extends Controller
     {
         $tag = Tag::find($id);
         if (!$tag) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+            // return response()->json([
+            //     'message' => 'Record not found'
+            // ], 404);
+
+            return $this->handleError('Tag not found', 404);
         }
-        $response = [
-            'tag'    => $tag,
-        ];
-        return response($response, 200);
+        // $response = [
+        //     'tag'    => $tag,
+        // ];
+        // return response($response, 200);
+        return $this->handleResponse(new TagResource($tag), 200);
     }
 
     /**
@@ -73,16 +79,18 @@ class TagController extends Controller
 
         $tag = Tag::find($id);
         if (!$tag) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+            // return response()->json([
+            //     'message' => 'Record not found'
+            // ], 404);
+            return $this->handleError('Tag not found', 404);
         }
         $tag->name = $request->name;
         $tag->save();
-        $response = [
-            'tag'    => $tag,
-        ];
-        return response($response, 200);
+        // $response = [
+        //     'tag'    => $tag,
+        // ];
+        // return response($response, 200);
+        return $this->handleResponse(new TagResource($tag), 200);
     }
 
     /**
@@ -96,14 +104,16 @@ class TagController extends Controller
 
         $tag = Tag::find($id);
         if (!$tag) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+            // return response()->json([
+            //     'message' => 'Record not found'
+            // ], 404);
+            return $this->handleError('Tag not found', 404);
         }
         $tag->delete();
 
-        return response()->json([
-            'message' => 'Record deleted'
-        ], 200);
+        // return response()->json([
+        //     'message' => 'Record deleted'
+        // ], 200);
+        return $this->handleResponse('Record deleted', 200);
     }
 }
