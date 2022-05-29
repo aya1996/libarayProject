@@ -37,6 +37,6 @@ Route::delete('/tags/{id}', [TagController::class, 'delete']);
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{id}', [BookController::class, 'show']);
 Route::post('/book', [BookController::class, 'store']);
-Route::put('/books/{id}', [BookController::class, 'update']);
+Route::post('/editBook/{id}', [BookController::class, 'update']);
 Route::delete('/books/{id}', [BookController::class, 'delete']);
 Route::get('/book/showProfile/{id}', [BookController::class, 'showProfile']);

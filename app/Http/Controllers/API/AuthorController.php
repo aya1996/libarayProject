@@ -8,9 +8,11 @@ use App\Http\Resources\AuthorResource;
 use App\Models\Author;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use App\Traits\ImageTrait;
 
 class AuthorController extends Controller
 {
+    use ImageTrait;
     /**
      * Display a listing of the resource.
      *
@@ -18,7 +20,8 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        return Author::all();
+        return $this->handleResponse(authorResource::collection(Author::all()), 200);
+        // return authorResource::collection(Author::all());
     }
 
     /**
@@ -35,20 +38,20 @@ class AuthorController extends Controller
         $author->save();
 
         if ($request->hasfile('image')) {
-            $image = $request->file('image');
-            $name = mt_rand() . '.' . $image->getClientOriginalExtension();
+            $name = $this->saveImage($request->image);
+            $author->image = $name;
+            // $image = $request->file('image');
+            // $name = mt_rand() . '.' . $image->getClientOriginalExtension();
 
-            $image->move(public_path() . '/images/', $name);
+            // $image->move(public_path() . '/images/', $name);
+
         }
 
-        $author->image = $name;
+
         $author->save();
 
-        $response = [
-            'author'    => $author,
-
-        ];
-        return response($response, 201);
+        return $this->handleResponse(new AuthorResource($author), 201);
+        // return new AuthorResource($author);
     }
 
     /**
@@ -62,12 +65,11 @@ class AuthorController extends Controller
 
         $author = Author::find($id);
         if (!$author) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+            return $this->handleError('Author not found', 404);
         }
 
-        return new AuthorResource($author);
+        return $this->handleResponse(new AuthorResource($author), 200);
+        // return new AuthorResource($author);
     }
 
     /**
@@ -86,22 +88,23 @@ class AuthorController extends Controller
 
         if ($request->hasfile('image')) {
             File::delete(public_path('images/' . $author->image));
-
-            $image = $request->file('image');
-            $name = mt_rand() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path() . '/images/', $name);
+            $name = $this->updateImage($request->image);
+            $author->image = $name;
+            // $image = $request->file('image');
+            // $name = mt_rand() . '.' . $image->getClientOriginalExtension();
+            // $image->move(public_path() . '/images/', $name);
         }
 
-        $author->image = $name;
+
         $author->update();
         //  dd($author);
 
-        $response = [
-            'message' => 'Author updated successfully',
+        // $response = [
+        //     'message' => 'Author updated successfully',
 
-        ];
-
-        return new AuthorResource($author, $response);
+        // ];
+        return $this->handleResponse(new AuthorResource($author), 200);
+        // return new AuthorResource($author, $response);
     }
 
     /**
@@ -114,16 +117,18 @@ class AuthorController extends Controller
     {
         $author = Author::find($id);
         if (!$author) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+            // return response()->json([
+            //     'message' => 'Record not found'
+            // ], 404);
+            return $this->handleError('Author not found', 404);
         }
         $author->delete();
         File::delete(public_path('images/' . $author->image));
-        $response = [
-            'message'    => 'Record deleted successfully'
-        ];
-        return response($response, 200);
+        // $response = [
+        //     'message'    => 'Record deleted successfully'
+        // ];
+        // return response($response, 200);
+        return $this->handleResponse('Author deleted successfully', 200);
     }
 
     public function showProfile($id)
@@ -132,18 +137,16 @@ class AuthorController extends Controller
         $author = Author::find($id);
 
         if (!$author) {
-            return response()->json([
-                'message' => 'Record not found'
-            ], 404);
+            // return response()->json([
+            //     'message' => 'Record not found'
+            // ], 404);
+            return $this->handleError('Author not found', 404);
         }
 
         $author->books = $author->books()->get();
 
 
-        $response = [
-            'author'    => $author,
-
-        ];
-        return response($response, 200);
+        return $this->handleResponse(new AuthorResource($author), 200);
+        //return new AuthorResource($author);
     }
 }
