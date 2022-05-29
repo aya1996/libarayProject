@@ -18,6 +18,24 @@ class BookCRUDTest extends TestCase
     public function test_get_all_books()
     {
         $response = $this->get('api/books');
+        $response
+            ->assertJsonStructure([
+                '*' => [
+                    'id',
+                    'title',
+                    'image',
+                    'author_id',
+                    'tags' => [
+                        '*' => [
+                            'id',
+                            'name',
+                        ],
+                    ],
+                    'created_at',
+                    'updated_at',
+                ],
+
+            ]);
 
         $response->assertStatus(200);
     }
@@ -26,6 +44,8 @@ class BookCRUDTest extends TestCase
     {
         $book = Book::factory()->create();
         $response = $this->get('api/books/' . $book->id);
+
+       
 
         $response->assertStatus(200);
     }

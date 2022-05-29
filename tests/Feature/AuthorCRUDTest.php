@@ -28,6 +28,18 @@ class AuthorCRUDTest extends TestCase
     {
         $response = $this->get('api/authors');
 
+        $response
+            ->assertJsonStructure([
+                '*' => [
+                    'id',
+                    'name',
+                    'title',
+                    'image',
+                    'created_at',
+                    'updated_at',
+                ],
+
+            ]);
         $response->assertStatus(200);
     }
 

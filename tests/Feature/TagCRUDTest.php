@@ -20,6 +20,16 @@ class TagCRUDTest extends TestCase
     {
         $response = $this->get('api/tags');
         //   dd($response->json());
+        $response
+            ->assertJsonStructure([
+                '*' => [
+                    'id',
+                    'name',
+                    'created_at',
+                    'updated_at',
+                ],
+
+            ]);
         $response->assertStatus(200);
     }
 
@@ -27,6 +37,7 @@ class TagCRUDTest extends TestCase
     {
         $tag = Tag::factory()->create();
         $response = $this->get('api/tags/' . $tag->id);
+      
 
         $response->assertStatus(200);
     }
@@ -45,7 +56,7 @@ class TagCRUDTest extends TestCase
             'name' => 'Test Tag',
 
         ]);
-        $response->assertStatus(200);
+        $response->assertStatus(201);
     }
 
     public function test_update_tag()
